@@ -1,2 +1,0 @@
-# Avalia-o
-Avaliação quinzenal
