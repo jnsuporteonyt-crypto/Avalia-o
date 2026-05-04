@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-title" content="Avaliação Quinzenal"/>
 <title>Avaliação Quinzenal</title>
-<link rel="manifest" href="manifest.json"/>
+<link rel="manifest" href="./manifest.json"/>
 <link rel="apple-touch-icon" href="icon-192.png"/>
 <style>
 :root{
@@ -963,7 +963,7 @@ function salvarPerfil(){
 }
 
 // SW
-if('serviceWorker'in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker'in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body>
 </html>
