@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="theme-color" content="#0a0f1e"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="Avaliação Quinzenal"/>
+<title>Avaliação Quinzenal</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<style>
+:root{
+  --bg:#0a0f1e;--bg2:#0f1629;--bg3:#141d35;--card:#111827;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --gold:#c9a84c;--gold2:#e8c97a;--gold3:rgba(201,168,76,0.14);
+  --blue:#3b82f6;--teal:#14b8a6;--teal2:#2dd4bf;
+  --red:#ef4444;--red2:#f87171;--green:#22c55e;--green2:#4ade80;
+  --orange:#f97316;--purple:#a855f7;
+  --text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;
+  --r:14px;--r2:10px;--shadow:0 8px 32px rgba(0,0,0,.45);
+  --tr:all .22s cubic-bezier(.4,0,.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.5}
+
+/* ── LOGIN ── */
+#login-screen{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;padding:24px;background:linear-gradient(160deg,var(--bg) 0%,#0d1a40 100%);
+}
+.login-logo{
+  width:72px;height:72px;border-radius:20px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:32px;font-weight:900;color:#0a0f1e;
+  margin-bottom:20px;box-shadow:0 8px 32px rgba(201,168,76,.3);
+  font-family:'Segoe UI',sans-serif;letter-spacing:-1px;
+}
+.login-title{font-size:22px;font-weight:800;color:var(--text);text-align:center;margin-bottom:4px}
+.login-sub{font-size:12px;color:var(--text3);text-align:center;margin-bottom:32px}
+.login-card{
+  background:var(--card);border:1px solid var(--border2);border-radius:var(--r);
+  padding:24px;width:100%;max-width:360px;
+}
+.login-card h2{font-size:16px;font-weight:700;color:var(--text);margin-bottom:20px;text-align:center}
+.form-g{margin-bottom:16px}
+.form-l{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block}
+.form-i{
+  width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border2);
+  border-radius:var(--r2);padding:11px 13px;color:var(--text);font-size:13px;
+  font-family:inherit;outline:none;transition:var(--tr);
+}
+.form-i:focus{border-color:var(--gold);background:rgba(201,168,76,.04)}
+.form-i::placeholder{color:var(--text3)}
+.btn{
+  width:100%;padding:13px;border-radius:var(--r2);border:none;
+  font-size:14px;font-weight:700;cursor:pointer;transition:var(--tr);
+  display:flex;align-items:center;justify-content:center;gap:7px;
+}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0f1e}
+.btn-gold:active{transform:scale(.97)}
+.btn-ghost{background:rgba(255,255,255,.06);border:1px solid var(--border2);color:var(--text);margin-top:8px}
+.login-err{color:var(--red2);font-size:12px;text-align:center;margin-top:10px;display:none}
+
+/* ── APP ── */
+#app-screen{display:none;flex-direction:column;height:100vh;overflow:hidden}
+#app-screen.visible{display:flex}
+
+/* TOPBAR */
+#topbar{
+  background:linear-gradient(135deg,var(--bg2),var(--bg3));
+  border-bottom:1px solid var(--border);padding:13px 16px 10px;
+  flex-shrink:0;display:flex;align-items:center;gap:10px;
+}
+.tb-logo{
+  width:34px;height:34px;border-radius:9px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;font-weight:900;color:#0a0f1e;
+}
+.tb-info{flex:1;min-width:0}
+.tb-info h1{font-size:15px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-info p{font-size:10px;color:var(--text3)}
+.tb-btn{
+  width:34px;height:34px;border-radius:9px;border:1px solid var(--border2);
+  background:transparent;color:var(--text2);display:flex;align-items:center;
+  justify-content:center;cursor:pointer;flex-shrink:0;font-size:17px;transition:var(--tr);
+}
+.tb-btn:active{background:var(--gold3)}
+
+/* CONTENT */
+#content{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:78px}
+#content::-webkit-scrollbar{width:3px}
+#content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* NAV */
+#nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:rgba(10,15,30,.96);backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex;padding:7px 0 max(env(safe-area-inset-bottom),7px);
+}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:5px 2px;cursor:pointer;transition:var(--tr);border:none;background:transparent}
+.ni-ic{font-size:19px;line-height:1}
+.ni-lb{font-size:10px;font-weight:500;color:var(--text3)}
+.ni.active .ni-lb{color:var(--gold)}
+
+/* SCREENS */
+.screen{display:none;padding:14px}
+.screen.active{display:block;animation:fadeUp .28s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:15px;margin-bottom:11px}
+.card-hdr{display:flex;align-items:center;gap:9px;margin-bottom:13px}
+.card-ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.card-hdr h2{font-size:14px;font-weight:700;color:var(--text)}
+.card-hdr p{font-size:11px;color:var(--text3)}
+
+/* HERO */
+.hero{
+  background:linear-gradient(135deg,var(--bg3),#1a2540);
+  border:1px solid var(--border);border-radius:var(--r);
+  padding:18px 15px;margin-bottom:14px;position:relative;overflow:hidden;
+}
+.hero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;
+  border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.1),transparent 70%)}
+.hero-tag{display:inline-flex;align-items:center;gap:4px;
+  background:var(--gold3);border:1px solid rgba(201,168,76,.3);
+  border-radius:20px;padding:3px 9px;font-size:10px;font-weight:700;
+  color:var(--gold);margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px}
+.hero h2{font-size:20px;font-weight:800;color:var(--text);line-height:1.2;margin-bottom:5px}
+.hero p{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* SEC LABEL */
+.sec-lb{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;
+  color:var(--text3);margin:18px 0 8px}
+
+/* METRIC GRID */
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.mg3{grid-template-columns:1fr 1fr 1fr}
+.mbox{background:rgba(255,255,255,.03);border:1px solid var(--border);
+  border-radius:var(--r2);padding:11px 9px;text-align:center}
+.mbox .mv{font-size:19px;font-weight:800;color:var(--gold);line-height:1}
+.mbox .ml{font-size:10px;color:var(--text3);margin-top:3px;line-height:1.3}
+.mbox.g .mv{color:var(--green)}.mbox.r .mv{color:var(--red)}.mbox.b .mv{color:var(--blue)}
+.mbox.t .mv{color:var(--teal2)}.mbox.o .mv{color:var(--orange)}
+
+/* SEMAPHORE */
+.sema{display:flex;gap:8px;margin-bottom:11px}
+.sem{flex:1;text-align:center;padding:9px 5px;border-radius:var(--r2);border:1px solid}
+.sem.g{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3);color:var(--green)}
+.sem.y{background:rgba(249,115,22,.1);border-color:rgba(249,115,22,.3);color:var(--orange)}
+.sem.r{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:var(--red)}
+.sem .sv{font-size:18px;font-weight:800;margin-bottom:2px}
+.sem .sl{font-size:9px;font-weight:500}
+
+/* TABLE SCROLLABLE */
+.table-wrap{overflow-x:auto;margin-bottom:12px;border-radius:var(--r2);border:1px solid var(--border)}
+.table-wrap::-webkit-scrollbar{height:4px}
+.table-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+table{border-collapse:collapse;width:100%;min-width:700px;font-size:12px}
+thead tr{background:var(--bg3)}
+thead th{padding:9px 10px;text-align:left;font-weight:700;color:var(--text2);
+  font-size:10px;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;
+  border-bottom:1px solid var(--border2)}
+thead th:first-child{position:sticky;left:0;background:var(--bg3);z-index:2;min-width:160px}
+tbody tr{border-bottom:1px solid var(--border);transition:var(--tr)}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.02)}
+tbody tr.cat-row td{background:rgba(59,130,246,.08);color:var(--blue);font-weight:700;
+  font-size:10px;text-transform:uppercase;letter-spacing:.8px;padding:6px 10px}
+tbody tr.cat-row td:first-child{position:sticky;left:0;background:rgba(20,30,60,.98)}
+td{padding:9px 10px;color:var(--text2);white-space:nowrap}
+td:first-child{position:sticky;left:0;background:var(--card);z-index:1;
+  color:var(--text);font-weight:500;border-right:1px solid var(--border)}
+td.baseline{color:var(--text3);font-style:italic}
+td.input-cell{padding:4px 6px}
+td.input-cell input{
+  background:rgba(255,255,255,.05);border:1px solid var(--border2);
+  border-radius:6px;padding:5px 7px;color:var(--text);font-size:12px;
+  width:72px;outline:none;font-family:inherit;transition:var(--tr);
+}
+td.input-cell input:focus{border-color:var(--gold);background:rgba(201,168,76,.05)}
+td.val-g{color:var(--green);font-weight:700}
+td.val-r{color:var(--red);font-weight:700}
+td.val-y{color:var(--orange);font-weight:700}
+td.val-ref{color:var(--text3);font-size:11px}
+td.meta-col{color:var(--gold2);font-size:10px;font-style:italic}
+
+/* FORM */
+.form-g{margin-bottom:13px}
+.form-l{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;display:block}
+.form-i,.form-s,.form-ta{
+  width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border2);
+  border-radius:var(--r2);padding:10px 12px;color:var(--text);font-size:13px;
+  font-family:inherit;outline:none;transition:var(--tr);appearance:none;
+}
+.form-i:focus,.form-s:focus,.form-ta:focus{border-color:var(--gold)}
+.form-i::placeholder,.form-ta::placeholder{color:var(--text3)}
+.form-ta{resize:none;min-height:60px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.warn-note{font-size:10px;color:var(--orange);margin-top:3px;display:flex;align-items:center;gap:4px}
+
+/* ALERT */
+.alert{padding:11px;border-radius:var(--r2);margin-bottom:11px;font-size:12px;display:flex;gap:8px}
+.alert-w{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);color:var(--orange)}
+.alert-i{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:var(--blue)}
+.alert-s{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:var(--green2)}
+
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;
+  display:flex;align-items:flex-end;opacity:0;transition:opacity .3s;pointer-events:none}
+.modal-ov.open{opacity:1;pointer-events:all}
+.modal-sh{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;
+  padding:18px 15px max(env(safe-area-inset-bottom),24px);
+  transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);
+  max-height:90vh;overflow-y:auto}
+.modal-ov.open .modal-sh{transform:translateY(0)}
+.m-handle{width:34px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 14px}
+.m-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:3px}
+.m-sub{font-size:12px;color:var(--text3);margin-bottom:15px}
+
+/* TOAST */
+#toast{position:fixed;top:78px;left:50%;transform:translateX(-50%) translateY(-15px);
+  background:var(--card);border:1px solid var(--border2);border-radius:var(--r);
+  padding:9px 15px;font-size:13px;font-weight:500;color:var(--text);
+  box-shadow:var(--shadow);z-index:999;opacity:0;transition:all .28s ease;
+  white-space:nowrap;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* PROFILE BADGE */
+.pbadge{
+  display:flex;align-items:center;gap:10px;
+  background:var(--gold3);border:1px solid rgba(201,168,76,.3);
+  border-radius:var(--r2);padding:11px 13px;margin-bottom:12px;
+}
+.pbadge-av{width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;font-weight:800;color:#0a0f1e;flex-shrink:0}
+.pbadge-info h3{font-size:13px;font-weight:700;color:var(--text)}
+.pbadge-info p{font-size:11px;color:var(--gold2)}
+
+/* PROGRESS BAR */
+.pbar-wrap{margin-bottom:11px}
+.pbar-hdr{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px}
+.pbar-bg{height:7px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden}
+.pbar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .6s ease}
+
+/* STEP BADGE */
+.step-num{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold);margin-bottom:3px}
+.step-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:3px}
+.step-desc{font-size:11px;color:var(--text3);line-height:1.5}
+
+/* COLS */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+
+/* HISTORY ITEM */
+.hi{background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:13px 15px;margin-bottom:9px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:var(--tr)}
+.hi:active{border-color:var(--gold)}
+.hi-date{width:42px;height:42px;border-radius:9px;background:var(--gold3);
+  border:1px solid rgba(201,168,76,.3);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;flex-shrink:0}
+.hi-date .hd{font-size:15px;font-weight:800;color:var(--gold);line-height:1}
+.hi-date .hm{font-size:9px;color:var(--gold2);font-weight:600;text-transform:uppercase}
+.hi-info{flex:1;min-width:0}
+.hi-info h4{font-size:13px;font-weight:700;color:var(--text)}
+.hi-info p{font-size:11px;color:var(--text3)}
+.hi-score{width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;color:var(--gold);flex-shrink:0}
+
+/* EMPTY */
+.empty{text-align:center;padding:36px 18px}
+.empty .ei{font-size:44px;margin-bottom:11px;opacity:.5}
+.empty h3{font-size:15px;font-weight:700;color:var(--text2);margin-bottom:5px}
+.empty p{font-size:12px;color:var(--text3);line-height:1.5}
+
+/* IMP ROW */
+.imp-row{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)}
+.imp-row:last-child{border-bottom:none}
+.imp-ic{font-size:15px;flex-shrink:0}
+.imp-lb{flex:1;font-size:12px;color:var(--text2)}
+.imp-delta{font-size:13px;font-weight:700;flex-shrink:0}
+.imp-delta.pos{color:var(--green)}.imp-delta.neg{color:var(--red)}.imp-delta.neu{color:var(--text3)}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-logo">AQ</div>
+  <div class="login-title">Avaliação Quinzenal</div>
+  <div class="login-sub">Protocolo de Evolução Premium</div>
+
+  <div class="login-card" id="lcard-login">
+    <h2>👤 Entrar</h2>
+    <div class="form-g">
+      <label class="form-l">Usuário</label>
+      <input class="form-i" id="l-user" placeholder="Seu nome ou usuário" autocomplete="username"/>
+    </div>
+    <div class="form-g">
+      <label class="form-l">Senha</label>
+      <input class="form-i" id="l-pass" type="password" placeholder="Senha" autocomplete="current-password"/>
+    </div>
+    <button class="btn btn-gold" onclick="doLogin()">🔐 Entrar</button>
+    <button class="btn btn-ghost" onclick="showRegister()">➕ Cadastrar novo aluno</button>
+    <div class="login-err" id="l-err">Usuário ou senha incorretos</div>
+  </div>
+
+  <div class="login-card" id="lcard-reg" style="display:none">
+    <h2>✏️ Cadastro do Aluno</h2>
+    <div class="form-g">
+      <label class="form-l">Nome completo *</label>
+      <input class="form-i" id="r-nome" placeholder="Ex: Carlos Alberto"/>
+    </div>
+    <div class="cols">
+      <div class="form-g">
+        <label class="form-l">Peso (kg)</label>
+        <input class="form-i" type="number" id="r-peso" placeholder="74"/>
+      </div>
+      <div class="form-g">
+        <label class="form-l">Altura (m)</label>
+        <input class="form-i" type="number" step="0.01" id="r-altura" placeholder="1.83"/>
+      </div>
+    </div>
+    <div class="form-g">
+      <label class="form-l">Modalidade</label>
+      <input class="form-i" id="r-modal" placeholder="Ex: Corrida de Rua"/>
+    </div>
+    <div class="form-g">
+      <label class="form-l">Usuário (para login) *</label>
+      <input class="form-i" id="r-user" placeholder="Ex: carlos"/>
+    </div>
+    <div class="form-g">
+      <label class="form-l">Senha *</label>
+      <input class="form-i" type="password" id="r-pass" placeholder="Mínimo 4 caracteres"/>
+    </div>
+    <button class="btn btn-gold" onclick="doRegister()" style="margin-top:4px">✅ Criar Conta</button>
+    <button class="btn btn-ghost" onclick="showLogin()">← Voltar para Login</button>
+    <div class="login-err" id="r-err"></div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app-screen">
+
+  <div id="topbar">
+    <div class="tb-logo">AQ</div>
+    <div class="tb-info">
+      <h1 id="tb-title">Avaliação Quinzenal</h1>
+      <p id="tb-sub">Protocolo Premium</p>
+    </div>
+    <button class="tb-btn" onclick="openModal('modal-perfil')" title="Perfil">👤</button>
+    <button class="tb-btn" onclick="doLogout()" title="Sair">🚪</button>
+  </div>
+
+  <div id="content">
+
+    <!-- HOME -->
+    <div id="s-home" class="screen active">
+      <div class="hero">
+        <div class="hero-tag">⭐ Protocolo Premium</div>
+        <h2 id="hero-nome">Bem-vindo!</h2>
+        <p>Planilha de evolução quinzenal com 27 variáveis e semáforo de progresso</p>
+      </div>
+
+      <div id="home-stats" style="display:none">
+        <div class="mg mg3" id="home-metrics"></div>
+      </div>
+
+      <div class="sec-lb">Ações</div>
+      <div class="cols" style="margin-bottom:10px">
+        <button class="btn btn-gold" onclick="showScreen('s-nova')">➕ Nova Avaliação</button>
+        <button class="btn btn-ghost" onclick="showScreen('s-tabela')">📊 Ver Tabela</button>
+      </div>
+      <button class="btn" style="background:rgba(20,184,166,.15);border:1px solid rgba(20,184,166,.3);color:var(--teal2);margin-bottom:10px" onclick="showScreen('s-historico')">📋 Histórico de Avaliações</button>
+      <button class="btn btn-ghost" onclick="showScreen('s-relatorio')">📄 Relatório de Progresso</button>
+    </div>
+
+    <!-- NOVA AVALIAÇÃO -->
+    <div id="s-nova" class="screen">
+      <div class="card" style="border-left:3px solid var(--gold);margin-bottom:14px">
+        <div class="step-num">📋 Nova Avaliação</div>
+        <div class="step-title">Inserir Resultados</div>
+        <div class="step-desc">Preencha os campos disponíveis. Campos vazios serão ignorados.</div>
+        <div class="pbar-wrap" style="margin-top:10px;margin-bottom:0">
+          <div class="pbar-hdr"><span id="nova-prog-lb">0 campos preenchidos</span><span id="nova-pct">0%</span></div>
+          <div class="pbar-bg"><div class="pbar-fill" id="nova-pbar" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <div id="nova-form-content"></div>
+
+      <div class="cols" style="margin-top:4px">
+        <button class="btn btn-ghost" onclick="showScreen('s-home')">← Cancelar</button>
+        <button class="btn btn-gold" onclick="salvarAvaliacao()">💾 Salvar</button>
+      </div>
+    </div>
+
+    <!-- TABELA -->
+    <div id="s-tabela" class="screen">
+      <div class="card" style="border-left:3px solid var(--blue);margin-bottom:14px">
+        <div class="step-num">📊 Planilha de Evolução</div>
+        <div class="step-title">Todas as Avaliações</div>
+        <div class="step-desc">Baseline + até 6 avaliações quinzenais. Verde = melhora | Amarelo = estável | Vermelho = piora</div>
+      </div>
+      <div id="tabela-content"></div>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <div id="s-historico" class="screen">
+      <div class="card" style="border-left:3px solid var(--purple);margin-bottom:14px">
+        <div class="step-num">📋 Histórico</div>
+        <div class="step-title">Avaliações Anteriores</div>
+        <div class="step-desc">Toque para ver detalhes de cada avaliação</div>
+      </div>
+      <div id="hist-list"></div>
+    </div>
+
+    <!-- RELATÓRIO -->
+    <div id="s-relatorio" class="screen">
+      <div id="rel-content"></div>
+    </div>
+
+  </div><!-- /content -->
+
+  <nav id="nav">
+    <button class="ni active" data-s="s-home" onclick="showScreen('s-home',this)">
+      <span class="ni-ic">🏠</span><span class="ni-lb">Início</span></button>
+    <button class="ni" data-s="s-nova" onclick="showScreen('s-nova',this)">
+      <span class="ni-ic">➕</span><span class="ni-lb">Nova</span></button>
+    <button class="ni" data-s="s-tabela" onclick="showScreen('s-tabela',this)">
+      <span class="ni-ic">📊</span><span class="ni-lb">Tabela</span></button>
+    <button class="ni" data-s="s-historico" onclick="showScreen('s-historico',this)">
+      <span class="ni-ic">📋</span><span class="ni-lb">Histórico</span></button>
+    <button class="ni" data-s="s-relatorio" onclick="showScreen('s-relatorio',this)">
+      <span class="ni-ic">📄</span><span class="ni-lb">Relatório</span></button>
+  </nav>
+</div>
+
+<!-- PERFIL MODAL -->
+<div class="modal-ov" id="modal-perfil">
+  <div class="modal-sh">
+    <div class="m-handle"></div>
+    <div class="m-title">👤 Perfil do Aluno</div>
+    <div class="m-sub" id="mp-sub">Dados do aluno atual</div>
+    <div id="mp-content"></div>
+    <div class="cols" style="margin-top:12px">
+      <button class="btn btn-ghost" onclick="closeModal('modal-perfil')">Fechar</button>
+      <button class="btn btn-gold" onclick="salvarPerfil()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-ov" id="modal-det">
+  <div class="modal-sh">
+    <div class="m-handle"></div>
+    <div id="modal-det-content"></div>
+    <button class="btn btn-ghost" style="margin-top:10px" onclick="closeModal('modal-det')">Fechar</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════
+const SK = 'aq_db_v3';
+function loadDB(){ try{ return JSON.parse(localStorage.getItem(SK))||{users:{},currentUser:null}; }catch(e){ return {users:{},currentUser:null}; } }
+function saveDB(db){ localStorage.setItem(SK,JSON.stringify(db)); }
+let DB = loadDB();
+
+// ═══════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════
+function showLogin(){ document.getElementById('lcard-login').style.display='block'; document.getElementById('lcard-reg').style.display='none'; }
+function showRegister(){ document.getElementById('lcard-login').style.display='none'; document.getElementById('lcard-reg').style.display='block'; }
+
+function doLogin(){
+  const u=v('l-user').trim().toLowerCase(), p=v('l-pass');
+  const err=document.getElementById('l-err');
+  err.style.display='none';
+  if(!u||!p){ err.textContent='Preencha usuário e senha'; err.style.display='block'; return; }
+  if(!DB.users[u]){ err.textContent='Usuário não encontrado'; err.style.display='block'; return; }
+  if(DB.users[u].pass !== btoa(p)){ err.textContent='Senha incorreta'; err.style.display='block'; return; }
+  DB.currentUser=u; saveDB(DB);
+  enterApp();
+}
+
+function doRegister(){
+  const nome=v('r-nome').trim(), user=v('r-user').trim().toLowerCase();
+  const pass=v('r-pass'), peso=v('r-peso'), altura=v('r-altura'), modal=v('r-modal');
+  const err=document.getElementById('r-err');
+  err.style.display='none';
+  if(!nome||!user||!pass){ err.textContent='Nome, usuário e senha são obrigatórios'; err.style.display='block'; return; }
+  if(pass.length<4){ err.textContent='Senha mínima: 4 caracteres'; err.style.display='block'; return; }
+  if(DB.users[user]){ err.textContent='Usuário já existe'; err.style.display='block'; return; }
+  DB.users[user]={ nome, user, pass:btoa(pass), peso, altura, modalidade:modal, avaliacoes:[] };
+  DB.currentUser=user; saveDB(DB);
+  enterApp();
+}
+
+function doLogout(){
+  DB.currentUser=null; saveDB(DB);
+  document.getElementById('app-screen').classList.remove('visible');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('l-user').value='';
+  document.getElementById('l-pass').value='';
+  showLogin();
+}
+
+function enterApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-screen').classList.add('visible');
+  const u=currentUser();
+  document.getElementById('tb-title').textContent=u.nome;
+  document.getElementById('tb-sub').textContent=(u.modalidade||'Personal Training');
+  document.getElementById('hero-nome').textContent='Olá, '+u.nome.split(' ')[0]+'!';
+  buildNovaForm();
+  renderHome();
+}
+
+function currentUser(){ return DB.users[DB.currentUser]||{}; }
+function currentAvaliacoes(){ return currentUser().avaliacoes||[]; }
+
+// Auto login
+(function(){ if(DB.currentUser&&DB.users[DB.currentUser]) enterApp(); })();
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+function showScreen(id, btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else{ const nb=document.querySelector(`.ni[data-s="${id}"]`); if(nb) nb.classList.add('active'); }
+  const refreshers={
+    's-tabela':renderTabela,'s-historico':renderHistorico,'s-relatorio':renderRelatorio,'s-home':renderHome
+  };
+  if(refreshers[id]) refreshers[id]();
+  document.getElementById('content').scrollTop=0;
+}
+
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-ov').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); }));
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+function toast(msg,d=2400){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),d); }
+
+function v(id){ return (document.getElementById(id)||{}).value||''; }
+
+// ═══════════════════════════════════════
+// TESTS DEFINITION
+// ═══════════════════════════════════════
+const TESTS=[
+  {cat:'TORNOZELO / MOBILIDADE'},
+  {id:'t01_d',label:'T01 — Knee-to-Wall D (cm)',unit:'cm',baseline:'30 cm',meta:'> 10 cm',metaVal:10,higher:true},
+  {id:'t01_e',label:'T01 — Knee-to-Wall E (cm)',unit:'cm',baseline:'37 cm',meta:'> 10 cm',metaVal:10,higher:true},
+  {id:'t02_d',label:'T02 — Calf Raise D (reps)',unit:'reps',baseline:'—',meta:'> 25 reps',metaVal:25,higher:true,warn:'Aquiles sensível — VAS pré/pós'},
+  {id:'t02_e',label:'T02 — Calf Raise E (reps)',unit:'reps',baseline:'—',meta:'> 25 reps',metaVal:25,higher:true},
+  {cat:'JOELHO'},
+  {id:'t03_d',label:'T03 — Flexão Joelho D (°)',unit:'°',baseline:'123°',meta:'> 140°',metaVal:140,higher:true},
+  {id:'t03_e',label:'T03 — Flexão Joelho E (°)',unit:'°',baseline:'130°',meta:'> 140°',metaVal:140,higher:true},
+  {id:'t04_d',label:'T04 — Wall Squat D (s)',unit:'s',baseline:'—',meta:'> 60s',metaVal:60,higher:true},
+  {id:'t04_e',label:'T04 — Wall Squat E (s)',unit:'s',baseline:'—',meta:'> 60s',metaVal:60,higher:true},
+  {id:'t05_d',label:'T05 — SLSq D (reps verdes/10)',unit:'/10',baseline:'—',meta:'10/10',metaVal:10,higher:true},
+  {id:'t05_e',label:'T05 — SLSq E (reps verdes/10)',unit:'/10',baseline:'—',meta:'10/10',metaVal:10,higher:true},
+  {id:'t06_d',label:'T06 — Nordic D (s descida)',unit:'s',baseline:'—',meta:'> 4s',metaVal:4,higher:true},
+  {id:'t06_e',label:'T06 — Nordic E (s descida)',unit:'s',baseline:'—',meta:'> 4s',metaVal:4,higher:true},
+  {cat:'QUADRIL'},
+  {id:'t07_d',label:'T07 — Hip Abd D (reps)',unit:'reps',baseline:'—',meta:'> 20 reps',metaVal:20,higher:true},
+  {id:'t07_e',label:'T07 — Hip Abd E (reps)',unit:'reps',baseline:'—',meta:'> 20 reps',metaVal:20,higher:true},
+  {id:'t11_d',label:'T11 — RI Quadril D (°)',unit:'°',baseline:'10°',meta:'> 20°',metaVal:20,higher:true,warn:'Acentuadamente restrita'},
+  {id:'t11_e',label:'T11 — RI Quadril E (°)',unit:'°',baseline:'14°',meta:'> 20°',metaVal:20,higher:true},
+  {cat:'NEURAL / PROPRIOCEPTIVA'},
+  {id:'t08_d',label:'T08 — Balance D aberto (s)',unit:'s',baseline:'—',meta:'> 45s',metaVal:45,higher:true},
+  {id:'t08_e',label:'T08 — Balance E aberto (s)',unit:'s',baseline:'—',meta:'> 45s',metaVal:45,higher:true},
+  {id:'t09_d',label:'T09 — Step-Down D (verdes/10)',unit:'/10',baseline:'—',meta:'10/10',metaVal:10,higher:true},
+  {id:'t09_e',label:'T09 — Step-Down E (verdes/10)',unit:'/10',baseline:'—',meta:'10/10',metaVal:10,higher:true},
+  {cat:'POTÊNCIA / SIMETRIA'},
+  {id:'t10_d',label:'T10 — Triple Hop D (cm)',unit:'cm',baseline:'19,9 cm',meta:'IS > 90%',metaVal:null,higher:true},
+  {id:'t10_e',label:'T10 — Triple Hop E (cm)',unit:'cm',baseline:'25,6 cm',meta:'IS > 90%',metaVal:null,higher:true},
+  {id:'t10_is',label:'T10 — Índice de Simetria (%)',unit:'%',baseline:'71,3%',meta:'> 90%',metaVal:90,higher:true,warn:'Assimetria crítica'},
+  {cat:'SUBJETIVOS'},
+  {id:'t12_vas',label:'T12 — VAS Joelho D (0-10)',unit:'/10',baseline:'2',meta:'< 2/10',metaVal:2,higher:false},
+  {id:'t12_ikdc',label:'T12 — IKDC simplificado (média)',unit:'',baseline:'~6,5',meta:'> 8,0',metaVal:8,higher:true},
+  {id:'t12_tampa',label:'T12 — Tampa Scale (soma)',unit:'/16',baseline:'Alta',meta:'< 10',metaVal:10,higher:false},
+];
+
+const TESTS_ONLY = TESTS.filter(t=>t.id);
+
+// ═══════════════════════════════════════
+// BUILD NOVA FORM
+// ═══════════════════════════════════════
+function buildNovaForm(){
+  let html='';
+  TESTS.forEach(t=>{
+    if(t.cat){
+      html+=`<div class="sec-lb">${t.cat}</div>`;
+    } else {
+      html+=`<div class="card" style="margin-bottom:9px">
+        <div class="form-l">${t.label} <span style="color:var(--text3);font-size:9px">${t.unit}</span>
+          ${t.warn?`<span style="color:var(--orange);font-size:9px;margin-left:4px">⚡ ${t.warn}</span>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input class="form-i" type="number" id="nf_${t.id}" step="0.1"
+            placeholder="${t.baseline||'—'}"
+            oninput="updateNovaProgress()" style="max-width:140px"/>
+          <span style="font-size:11px;color:var(--text3)">Meta: ${t.meta}</span>
+        </div>
+        ${t.baseline&&t.baseline!=='—'?`<div style="font-size:10px;color:var(--text3);margin-top:3px">Baseline: ${t.baseline}</div>`:''}
+      </div>`;
+    }
+  });
+  document.getElementById('nova-form-content').innerHTML=html;
+}
+
+function updateNovaProgress(){
+  const total=TESTS_ONLY.length;
+  const filled=TESTS_ONLY.filter(t=>(document.getElementById('nf_'+t.id)||{}).value!=='').length;
+  const pct=Math.round(filled/total*100);
+  document.getElementById('nova-pbar').style.width=pct+'%';
+  document.getElementById('nova-pct').textContent=pct+'%';
+  document.getElementById('nova-prog-lb').textContent=filled+' de '+total+' campos';
+}
+
+// ═══════════════════════════════════════
+// SALVAR AVALIAÇÃO
+// ═══════════════════════════════════════
+function salvarAvaliacao(){
+  const filled=TESTS_ONLY.filter(t=>(document.getElementById('nf_'+t.id)||{}).value!=='');
+  if(!filled.length){ toast('⚠️ Preencha ao menos um campo'); return; }
+  const data={};
+  TESTS_ONLY.forEach(t=>{ const el=document.getElementById('nf_'+t.id); if(el&&el.value!=='') data[t.id]=parseFloat(el.value); });
+  data._date=new Date().toISOString();
+  data._score=calcScore(data);
+  const u=currentUser();
+  if(!u.avaliacoes) u.avaliacoes=[];
+  u.avaliacoes.push(data);
+  DB.users[DB.currentUser]=u;
+  saveDB(DB);
+  // Clear form
+  TESTS_ONLY.forEach(t=>{ const el=document.getElementById('nf_'+t.id); if(el) el.value=''; });
+  updateNovaProgress();
+  toast('✅ Avaliação salva com sucesso!');
+  showScreen('s-home');
+}
+
+function calcScore(d){
+  let pts=0,tot=0;
+  TESTS_ONLY.forEach(t=>{
+    if(d[t.id]===undefined||t.metaVal===null) return;
+    tot+=100;
+    const v=d[t.id],m=t.metaVal;
+    if(t.higher) pts+=Math.min((v/m)*100,100);
+    else pts+=Math.min(((m-(v-m))/m)*100,100);
+  });
+  return tot>0?Math.round(pts/tot):0;
+}
+
+// ═══════════════════════════════════════
+// HOME
+// ═══════════════════════════════════════
+function renderHome(){
+  const avs=currentAvaliacoes();
+  const stats=document.getElementById('home-stats');
+  const metrics=document.getElementById('home-metrics');
+  if(!avs.length){ stats.style.display='none'; return; }
+  stats.style.display='block';
+  const last=avs[avs.length-1];
+  const base=avs[0];
+  const is=last.t10_d&&last.t10_e?Math.round(last.t10_d/last.t10_e*100):null;
+  metrics.innerHTML=`
+    <div class="mbox"><div class="mv">${last._score||0}%</div><div class="ml">Score atual</div></div>
+    <div class="mbox ${last.t12_vas!==undefined?(last.t12_vas<=2?'g':'r'):''}">
+      <div class="mv">${last.t12_vas!==undefined?last.t12_vas+'/10':'—'}</div><div class="ml">VAS Joelho D</div></div>
+    <div class="mbox ${is!==null?(is>=90?'g':is>=80?'o':'r'):''}">
+      <div class="mv">${is!==null?is+'%':'—'}</div><div class="ml">IS Salto</div></div>
+    <div class="mbox"><div class="mv">${avs.length}</div><div class="ml">Avaliações</div></div>
+    <div class="mbox ${last.t04_d!==undefined?(last.t04_d>=60?'g':last.t04_d>=40?'o':'r'):''}">
+      <div class="mv">${last.t04_d!==undefined?last.t04_d+'s':'—'}</div><div class="ml">Wall Squat D</div></div>
+    <div class="mbox ${last.t10_is!==undefined?(last.t10_is>=90?'g':last.t10_is>=80?'o':'r'):''}">
+      <div class="mv">${last.t10_is!==undefined?last.t10_is+'%':'—'}</div><div class="ml">T10 IS (%)</div></div>
+  `;
+}
+
+// ═══════════════════════════════════════
+// TABELA (planilha)
+// ═══════════════════════════════════════
+const BASELINES={
+  t01_d:'30 cm',t01_e:'37 cm',t03_d:'123°',t03_e:'130°',
+  t10_d:'19,9 cm',t10_e:'25,6 cm',t10_is:'71,3%',
+  t11_d:'10°',t11_e:'14°',t12_vas:'2',t12_ikdc:'~6,5',t12_tampa:'Alta',
+};
+
+function renderTabela(){
+  const avs=currentAvaliacoes();
+  const slots=['Av.1','Av.2','Av.3','Av.4','Av.5','Av.6'];
+
+  let hdr=`<thead><tr>
+    <th>Variável / Teste</th>
+    <th class="baseline">Baseline</th>
+    <th>Meta</th>
+    ${slots.map((s,i)=>{
+      const d=avs[i]?new Date(avs[i]._date).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—';
+      return `<th>${s}<br><span style="font-size:9px;font-weight:400">${d}</span></th>`;
+    }).join('')}
+  </tr></thead>`;
+
+  let body='<tbody>';
+  TESTS.forEach(t=>{
+    if(t.cat){
+      body+=`<tr class="cat-row"><td colspan="${3+slots.length}">${t.cat}</td></tr>`;
+      return;
+    }
+    body+=`<tr>
+      <td>${t.label}</td>
+      <td class="baseline">${BASELINES[t.id]||'—'}</td>
+      <td class="meta-col">${t.meta}</td>
+      ${slots.map((s,i)=>{
+        const av=avs[i];
+        if(!av||av[t.id]===undefined) return `<td style="color:var(--text3)">—</td>`;
+        const val=av[t.id];
+        let cls='';
+        // Compare with previous
+        const prev=i>0?avs[i-1]:null;
+        if(prev&&prev[t.id]!==undefined){
+          const delta=t.higher?(val-prev[t.id]):(prev[t.id]-val);
+          const pct=prev[t.id]!==0?Math.abs(delta/prev[t.id])*100:0;
+          if(pct>=5) cls=delta>0?'val-g':'val-r';
+          else cls='val-y';
+        }
+        // Check meta
+        let metaOk=false;
+        if(t.metaVal!==null&&t.metaVal!==undefined){
+          metaOk=t.higher?val>=t.metaVal:val<=t.metaVal;
+        }
+        return `<td class="${cls}">${val}${t.unit}${metaOk?' ✓':''}</td>`;
+      }).join('')}
+    </tr>`;
+  });
+  body+='</tbody>';
+
+  // Score row
+  body+=`<tbody><tr style="border-top:2px solid var(--border2)">
+    <td style="font-weight:700;color:var(--gold)">Score Geral</td>
+    <td class="baseline">—</td><td class="meta-col">100%</td>
+    ${slots.map((s,i)=>{
+      const av=avs[i];
+      if(!av) return '<td style="color:var(--text3)">—</td>';
+      const sc=av._score||0;
+      const cls=sc>=75?'val-g':sc>=50?'val-y':'val-r';
+      return `<td class="${cls}">${sc}%</td>`;
+    }).join('')}
+  </tr></tbody>`;
+
+  const html=`<div class="table-wrap"><table>${hdr}${body}</table></div>
+  <div class="alert alert-i">💡 Verde = melhora >5% | Amarelo = estável | Vermelho = piora | ✓ = meta atingida</div>`;
+  document.getElementById('tabela-content').innerHTML=html;
+}
+
+// ═══════════════════════════════════════
+// HISTÓRICO
+// ═══════════════════════════════════════
+function renderHistorico(){
+  const avs=currentAvaliacoes();
+  const el=document.getElementById('hist-list');
+  if(!avs.length){
+    el.innerHTML=`<div class="empty"><div class="ei">📂</div><h3>Nenhuma avaliação</h3><p>Adicione sua primeira avaliação pelo botão ➕</p></div>`;
+    return;
+  }
+  const sorted=[...avs].map((a,i)=>({...a,_idx:i})).reverse();
+  el.innerHTML=sorted.map(av=>{
+    const d=new Date(av._date);
+    const sc=av._score||0;
+    return `<div class="hi" onclick="showDetail(${av._idx})">
+      <div class="hi-date">
+        <div class="hd">${d.getDate()}</div>
+        <div class="hm">${d.toLocaleString('pt-BR',{month:'short'})}</div>
+      </div>
+      <div class="hi-info">
+        <h4>Avaliação ${av._idx+1} — ${d.toLocaleDateString('pt-BR')}</h4>
+        <p>${Object.keys(av).filter(k=>!k.startsWith('_')).length} testes · Score: ${sc}%</p>
+      </div>
+      <div class="hi-score">${sc}%</div>
+    </div>`;
+  }).join('');
+}
+
+function showDetail(idx){
+  const av=currentAvaliacoes()[idx];
+  if(!av) return;
+  const d=new Date(av._date);
+  const is=av.t10_d&&av.t10_e?Math.round(av.t10_d/av.t10_e*100):null;
+  let html=`<div class="m-title">Avaliação ${idx+1}</div>
+    <div class="m-sub">${d.toLocaleDateString('pt-BR',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>
+    <div class="mg mg3" style="margin-bottom:14px">
+      <div class="mbox ${(av._score||0)>=75?'g':'r'}"><div class="mv">${av._score||0}%</div><div class="ml">Score</div></div>
+      <div class="mbox ${is!==null?(is>=90?'g':'r'):''}"><div class="mv">${is?is+'%':'—'}</div><div class="ml">IS Salto</div></div>
+      <div class="mbox ${av.t12_vas!==undefined?(av.t12_vas<=2?'g':'r'):''}">
+        <div class="mv">${av.t12_vas!==undefined?av.t12_vas+'/10':'—'}</div><div class="ml">VAS D</div></div>
+    </div>`;
+  TESTS.forEach(t=>{
+    if(t.cat){ html+=`<div class="sec-lb">${t.cat}</div>`; return; }
+    if(av[t.id]===undefined) return;
+    const val=av[t.id];
+    let metaOk=t.metaVal!==null&&t.metaVal!==undefined&&(t.higher?val>=t.metaVal:val<=t.metaVal);
+    html+=`<div class="imp-row">
+      <span class="imp-lb">${t.label}</span>
+      <span class="imp-delta ${metaOk?'pos':'neu'}">${val}${t.unit}${metaOk?' ✓':''}</span>
+    </div>`;
+  });
+  document.getElementById('modal-det-content').innerHTML=html;
+  openModal('modal-det');
+}
+
+// ═══════════════════════════════════════
+// RELATÓRIO
+// ═══════════════════════════════════════
+function renderRelatorio(){
+  const avs=currentAvaliacoes();
+  const el=document.getElementById('rel-content');
+  if(!avs.length){
+    el.innerHTML=`<div class="card" style="border-left:3px solid var(--purple)">
+      <div class="step-num">📄 Relatório</div><div class="step-title">Análise de Progresso</div></div>
+      <div class="empty"><div class="ei">📊</div><h3>Sem dados</h3><p>Complete ao menos uma avaliação</p></div>`;
+    return;
+  }
+  const base=avs[0], last=avs[avs.length-1], u=currentUser();
+  const isFirst=avs.length===1;
+
+  const COMPARE=[
+    {label:'VAS Joelho D',id:'t12_vas',unit:'/10',inverse:true},
+    {label:'Knee-to-Wall D',id:'t01_d',unit:'cm'},
+    {label:'Flexão Joelho D',id:'t03_d',unit:'°'},
+    {label:'Wall Squat D',id:'t04_d',unit:'s'},
+    {label:'Wall Squat E',id:'t04_e',unit:'s'},
+    {label:'Calf Raise D',id:'t02_d',unit:' reps'},
+    {label:'Nordic D',id:'t06_d',unit:'s'},
+    {label:'SLSq D verdes',id:'t05_d',unit:'/10'},
+    {label:'SLSq E verdes',id:'t05_e',unit:'/10'},
+    {label:'Hip Abd D',id:'t07_d',unit:' reps'},
+    {label:'Hip Abd E',id:'t07_e',unit:' reps'},
+    {label:'Balance D',id:'t08_d',unit:'s'},
+    {label:'Balance E',id:'t08_e',unit:'s'},
+    {label:'Triple Hop D',id:'t10_d',unit:'cm'},
+    {label:'Triple Hop E',id:'t10_e',unit:'cm'},
+    {label:'IS Salto',id:'t10_is',unit:'%'},
+    {label:'RI Quadril D',id:'t11_d',unit:'°'},
+    {label:'IKDC',id:'t12_ikdc',unit:''},
+  ].filter(c=>base[c.id]!==undefined);
+
+  let imp=0,stab=0,wors=0;
+  COMPARE.forEach(c=>{
+    if(last[c.id]===undefined) return;
+    const d=(c.inverse?-1:1)*(last[c.id]-base[c.id]);
+    const p=base[c.id]!==0?Math.abs(d/base[c.id])*100:0;
+    if(p<5) stab++; else if(d>0) imp++; else wors++;
+  });
+
+  el.innerHTML=`
+    <div class="card" style="border-left:3px solid var(--purple);margin-bottom:14px">
+      <div class="step-num">📄 Relatório de Progresso</div>
+      <div class="step-title">${u.nome}</div>
+      <div class="step-desc">${avs.length} avaliações · Baseline → Atual</div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-ic" style="background:var(--gold3)">👤</div>
+        <div><h2>${u.nome}</h2><p>${u.modalidade||''} · ${avs.length} avaliações</p></div>
+      </div>
+      <div class="sema">
+        <div class="sem g"><div class="sv">${imp}</div><div class="sl">Melhorou</div></div>
+        <div class="sem y"><div class="sv">${stab}</div><div class="sl">Estável</div></div>
+        <div class="sem r"><div class="sv">${wors}</div><div class="sl">Piorou</div></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3)">
+        <span>Baseline: ${new Date(base._date).toLocaleDateString('pt-BR')}</span>
+        <span>Atual: ${new Date(last._date).toLocaleDateString('pt-BR')}</span>
+      </div>
+    </div>
+    <div class="sec-lb">Evolução por Variável</div>
+    <div class="card">
+      ${COMPARE.filter(c=>last[c.id]!==undefined).map(c=>{
+        const bv=base[c.id], nv=last[c.id];
+        const delta=(c.inverse?-1:1)*(nv-bv);
+        const pct=bv!==0?Math.round(Math.abs(delta/bv)*100):0;
+        const isNeu=pct<5;
+        const isPos=delta>0;
+        const cls=isNeu?'neu':isPos?'pos':'neg';
+        const ico=isNeu?'➡️':isPos?'✅':'⚠️';
+        return `<div class="imp-row">
+          <span class="imp-ic">${ico}</span>
+          <div><div class="imp-lb" style="font-weight:600;color:var(--text)">${c.label}</div>
+          <div class="imp-lb">${bv}${c.unit} → ${nv}${c.unit}</div></div>
+          <div class="imp-delta ${cls}">${isFirst?'—':(delta>=0?'+':'')+delta.toFixed(1)+c.unit}${!isFirst&&!isNeu?' ('+pct+'%)':''}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="alert alert-i" style="margin-top:8px">💡 Reavalie a cada 15 dias. Verde ≥5% melhora. Vermelho = investigar causa.</div>
+  `;
+}
+
+// ═══════════════════════════════════════
+// PERFIL MODAL
+// ═══════════════════════════════════════
+function openModal(id){
+  if(id==='modal-perfil') loadPerfilModal();
+  document.getElementById(id).classList.add('open');
+}
+function loadPerfilModal(){
+  const u=currentUser();
+  document.getElementById('mp-sub').textContent=u.user||'';
+  document.getElementById('mp-content').innerHTML=`
+    <div class="form-g"><label class="form-l">Nome</label>
+      <input class="form-i" id="mp-nome" value="${u.nome||''}"/></div>
+    <div class="cols">
+      <div class="form-g"><label class="form-l">Peso (kg)</label>
+        <input class="form-i" type="number" id="mp-peso" value="${u.peso||''}"/></div>
+      <div class="form-g"><label class="form-l">Altura (m)</label>
+        <input class="form-i" type="number" step="0.01" id="mp-altura" value="${u.altura||''}"/></div>
+    </div>
+    <div class="form-g"><label class="form-l">Modalidade</label>
+      <input class="form-i" id="mp-modal" value="${u.modalidade||''}"/></div>
+    <div class="form-g"><label class="form-l">Nova Senha (deixe em branco para manter)</label>
+      <input class="form-i" type="password" id="mp-pass" placeholder="Nova senha (opcional)"/></div>
+    <div class="pbadge" style="margin-top:8px">
+      <div class="pbadge-av">${(u.nome||'U')[0]}</div>
+      <div class="pbadge-info">
+        <h3>${u.nome||''}</h3>
+        <p>${u.avaliacoes?u.avaliacoes.length:0} avaliações registradas</p>
+      </div>
+    </div>
+  `;
+}
+function salvarPerfil(){
+  const u=currentUser();
+  u.nome=v('mp-nome').trim()||u.nome;
+  u.peso=v('mp-peso')||u.peso;
+  u.altura=v('mp-altura')||u.altura;
+  u.modalidade=v('mp-modal')||u.modalidade;
+  const np=v('mp-pass');
+  if(np&&np.length>=4) u.pass=btoa(np);
+  DB.users[DB.currentUser]=u;
+  saveDB(DB);
+  document.getElementById('tb-title').textContent=u.nome;
+  document.getElementById('hero-nome').textContent='Olá, '+u.nome.split(' ')[0]+'!';
+  closeModal('modal-perfil');
+  toast('✅ Perfil atualizado!');
+}
+
+// SW
+if('serviceWorker'in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
